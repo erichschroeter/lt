@@ -6,7 +6,7 @@
 class CliCommand : public Command
 {
 public:
-    virtual int parseCommandLine(int argc, char** argv) = 0;
+    virtual int execute(int argc, char** argv) = 0;
 };
 
 #endif

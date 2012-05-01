@@ -37,12 +37,9 @@ int main(int argc, char** argv)
         break;
     }
 
-    // TODO setup context (similar to taskwarrior)
     AddCommand cmd;
-    printv("parsing command: %s\n", "AddCommand");
-    cmd.parseCommandLine(argc, argv);
-    printv("executing command: %s\n", "AddCommand");
-    cmd.execute();
+    printv("execute command: %s\n", "AddCommand");
+    cmd.execute(argc, argv);
 
     return 0;
 }

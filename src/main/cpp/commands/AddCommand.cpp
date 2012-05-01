@@ -22,10 +22,6 @@ AddCommand::AddCommand() {
 }
 
 AddCommand::~AddCommand() {
-    //printf("deleting context.text\n");
-    //delete context.text;
-    //printf("deleting context.tags\n");
-    //delete context.tags;
 }
 
 Tag* parseTag(std::string text) {
@@ -69,7 +65,7 @@ Tag* parseTag(std::string text) {
  *
  * Tag syntax is <code>[(+|-|#)[a-zA-Z-_]]</code>.
  */
-int AddCommand::parseCommandLine(int argc, char** argv) {
+int AddCommand::execute(int argc, char** argv) {
      // require at least 2 arguments
      if (argc < 2) {
          return 0;
@@ -128,6 +124,8 @@ int AddCommand::parseCommandLine(int argc, char** argv) {
             }
         }
     }
+    
+    execute();
 
     return 0;
 }

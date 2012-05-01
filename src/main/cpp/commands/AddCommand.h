@@ -10,7 +10,7 @@ public:
     ~AddCommand();
     
     // CliCommand methods
-    int parseCommandLine(int argc, char** argv);
+    int execute(int argc, char** argv);
     // Command methods
     int execute();
 };
