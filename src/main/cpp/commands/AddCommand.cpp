@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <string.h>
+#include <string>
 #include <iostream>
 #include <iterator>
 #include <vector>
@@ -7,9 +7,14 @@
 #include "../util/Tags.h"
 
 typedef struct context {
-    char* text;
-    Tags tags;
+    std::string* text;
+    Tags* tags;
 } Context;
+
+typedef struct tag {
+    std::string* tag;
+    std::string* value;
+} Tag;
 
 Context context;
 
@@ -17,51 +22,123 @@ AddCommand::AddCommand() {
 }
 
 AddCommand::~AddCommand() {
-    delete context.text;
+    //printf("deleting context.text\n");
+    //delete context.text;
+    //printf("deleting context.tags\n");
+    //delete context.tags;
 }
 
+Tag* parseTag(std::string text) {
+    std::string key;
+    std::string value;
+    int i;
+    switch (text.at(0)) {
+    case '-':
+    case '+':
+    case '#':
+        i = 1;
+        break;
+    default:
+        i = 0;
+        break;
+    }
+    Tag* tag = new Tag();
+    int separator = text.find_first_of(":");
+    if (separator == std::string::npos) {
+        // key is from beginning to the end if no separator
+        key = text.substr(i, text.length() - i);
+    } else {
+        // key is from beginning to the separator
+        key = text.substr(i, separator);
+        // value is from separator to the end
+        value = text.substr(separator, text.length() - i - key.length());
+        tag->value = &value;
+    }
+    tag->tag = &key;
+    return tag;
+}
+
+/**
+ * Parses the command line to add a life tracker entry.
+ * <p>
+ * The command line syntax is as follows:
+ *
+ * <pre>
+ * [tags...] <entry text>
+ * </pre>
+ *
+ * Tag syntax is <code>[(+|-|#)[a-zA-Z-_]]</code>.
+ */
 int AddCommand::parseCommandLine(int argc, char** argv) {
-     char* text = new char[140]; // arbitrary length but we use SMS length
-     Tags tags;
-     context.text = text;
+     // require at least 2 arguments
+     if (argc < 2) {
+         return 0;
+     }
+     std::string text;
+     Tags* tags = new Tags();
+     context.text = &text;
      context.tags = tags;
      int i = 1;
-     if (!strcmp(argv[1], "add")) {
+     std::string arg = argv[1];
+     if (!arg.compare("add")) {
          // skip the command name
          i = 2;
      }
-     printf("HERE\n");
      int treat_remaining_as_text = 0;
      for (i; i < argc; i++) {
-        if (!strcmp(argv[i], "--")) {
+        arg = argv[i];
+        if (!arg.compare("--")) {
             treat_remaining_as_text++;
             continue; // we don't care about the --
         }
         if (treat_remaining_as_text) {
-            strcat(context.text, argv[i]);
+            context.text->append(argv[i]);
             // append a space only if not last arg
             if (i != (argc - 1)) {
-                strcat(context.text, " ");
+                context.text->append(" ");
             }
         } else {
-            if (argv[i][0] == '+' ||
-                argv[i][0] == '-' ||
+            if (argv[i][0] == '-' ||
+                argv[i][0] == '+' ||
                 argv[i][0] == '#') {
-                //printf("TAG: %s\n", argv[i]);
-                context.tags.add(argv[i]);
+                Tag* tag = parseTag(argv[i]);
+                switch (argv[i][0]) {
+                case '-':
+                    context.tags->remove(argv[i]);
+                    break;
+                case '+':
+                    context.tags->add(argv[i]);
+                    break;
+                case '#': // fall through
+                default:
+                    if (context.tags->contains(argv[i])) {
+                        context.tags->remove(argv[i]);
+                    } else {
+                        context.tags->add(argv[i]);
+                    }
+                    break;
+                }
+                delete tag;
             } else {
-                strcat(context.text, argv[i]);
+                context.text->append(argv[i]);
                 // append a space only if not last arg
                 if (i != (argc - 1)) {
-                    strcat(context.text, " ");
+                    context.text->append(" ");
                 }
             }
         }
     }
+
     return 0;
 }
 
 int AddCommand::execute() {
-    printf("TEXT: %s\n", context.text);
+    printf("TEXT: %s\n", (*context.text).c_str());
+    std::vector<std::string> tags = context.tags->asVector();
+    std::vector<std::string>::iterator iter = tags.begin();
+    while (iter != tags.end()) {
+        printf("TAGS: %s\n", (*iter).c_str());
+        iter++;
+    }
     return 0;
 }
