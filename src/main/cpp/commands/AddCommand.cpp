@@ -125,18 +125,17 @@ int AddCommand::execute(int argc, char** argv) {
         }
     }
     
-    execute();
+    printf("TEXT: %s\n", (*context.text).c_str());
+    std::vector<std::string> _tags = context.tags->asVector();
+    std::vector<std::string>::iterator iter = _tags.begin();
+    while (iter != _tags.end()) {
+        printf("TAGS: %s\n", (*iter).c_str());
+        iter++;
+    }
 
     return 0;
 }
 
 int AddCommand::execute() {
-    printf("TEXT: %s\n", (*context.text).c_str());
-    std::vector<std::string> tags = context.tags->asVector();
-    std::vector<std::string>::iterator iter = tags.begin();
-    while (iter != tags.end()) {
-        printf("TAGS: %s\n", (*iter).c_str());
-        iter++;
-    }
     return 0;
 }
